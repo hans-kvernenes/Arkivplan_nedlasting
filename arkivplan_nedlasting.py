@@ -34,27 +34,22 @@ async def run():
 
             # Wait for collapsible headers to appear
             try:
-                await page.wait_for_selector('[data-automation-id="CollapsibleLayer-Heading"]', timeout=1000)
+                await page.wait_for_selector('[data-automation-id="CollapsibleLayer-Heading"]', timeout=2000)
 
-                # Expand all collapsible sections
+                # Expand all collapsible sections regardless of current state
                 await page.evaluate("""
-                    () => {
-                        document.querySelectorAll('[data-automation-id="CollapsibleLayer-Heading"]').forEach(header => {
-                            const clickable = header.querySelector('a') || header;
-                            const content = header.nextElementSibling;
-
-                            // Check if the section is collapsed (content is hidden)
-                            const isCollapsed = content && content.offsetParent === null;
-
-                            if (clickable && isCollapsed) {
-                                clickable.click();
-                            }
-                        });
-                    }
+                () => {
+                    document.querySelectorAll('[data-automation-id="CollapsibleLayer-Heading"]').forEach(header => {
+                        const clickable = header.querySelector('a, button') || header;
+                        if (clickable) {
+                            clickable.click();
+                        }
+                    });
+                }
                 """)
-                await page.wait_for_timeout(1000)
+                await page.wait_for_timeout(2000)  # Increased wait time to ensure content is visible
             except:
-                print("Alle headere er åpne.")
+                print("Alle headere er åpne eller ingen kollapsbare seksjoner funnet.")
 
             # Save page as PDF
             filename = url.split("/")[-1].replace(".aspx", ".pdf")
